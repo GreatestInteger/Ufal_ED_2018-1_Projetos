@@ -1,4 +1,6 @@
 //IMPLEMENTAÇÃO DE FILAS DE PRIORIDADE
+#include <stdio.h>
+#include <stdlib.h>
 
 typedef struct node node;
 typedef struct priority_queue priority_queue;
@@ -48,24 +50,12 @@ void enqueue(priority_queue *pq, void *i, int p)
     }
 }
 
-int dequeue(priority_queue *pq)
+int dequeue_integers(priority_queue *pq)
 {
-    if(is_empty(pq))
-    {
-        printf("Priority Queue Underflow\n");
-        return NULL;
-    }
-    else
-    {
-        node *node = pq -> head;
-        pq -> head = pq -> head -> next;
-        node -> next = NULL;
-        return node -> item;
-    }
-}
+    int value;
 
-int maximum(priority_queue *pq)
-{
+    printf("Is empty (inside dequeue_integers): [%d]\n", is_empty(pq));
+
     if(is_empty(pq))
     {
         printf("Priority Queue Underflow\n");
@@ -73,10 +63,60 @@ int maximum(priority_queue *pq)
     }
     else
     {
-        return pq -> head -> item;
+        node *node = pq -> head;
+        pq -> head = pq -> head -> next;
+        node -> next = NULL;
+        value = *(int*) node -> item;
+        free(node);
+        return value;
     }
 }
 
+void print_priority_queue_of_integers(priority_queue *pq)
+{
+  if(is_empty(pq))
+  {
+      printf("It is empty.\n");
+  }
+  else {
+    printf("---- \n");
 
+    node * aux = pq->head;
+    while (pq -> head != NULL) {
+        printf("[%p][%d]\n", pq->head->item, *((int*) pq->head->item));
+        pq->head = pq->head->next;
+    }
+    pq->head = aux;
+    printf("---- \n");
+  }
+}
 
 //---------------------------------------------------------//
+
+int main () {
+
+  int item = 42, item_2 = 50, item_3 = 37;
+  printf("[%p][%d]\n", &item, item);
+  printf("[%p][%d]\n", &item_2, item_2);
+  printf("[%p][%d]\n", &item_3, item_3);
+
+  priority_queue *pqueue = create_priority_queue();
+
+  printf("Is empty (after creating pqueue): [%d]\n", is_empty(pqueue));
+
+  enqueue(pqueue, &item, 100);
+  enqueue(pqueue, &item_2, 9);
+  enqueue(pqueue, &item_3, 77);
+
+  printf("Is empty (after enqueue): [%d]\n", is_empty(pqueue));
+
+  print_priority_queue_of_integers(pqueue);
+
+  printf("%d\n", dequeue_integers(pqueue));
+  printf("%d\n", dequeue_integers(pqueue));
+  printf("%d\n", dequeue_integers(pqueue));
+  printf("%d\n", dequeue_integers(pqueue));
+  print_priority_queue_of_integers(pqueue);
+
+  return 0;
+}
