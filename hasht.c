@@ -28,20 +28,20 @@ hash_table *create_hash_table(){
 void pass_through_edges_and_add_characters(node *huffman_tree, unsigned char *bit_string, int index, unsigned char bit, hash_table *ht) {
 
     if(index > 1){
-      bit_string[index] = bit;
-      if(is_leaf(huffman_tree))
-      {
-        bit_string[index + 1] = '\0';
-        strcpy(ht->table[(int) *(unsigned char*) huffman_tree->item]->bits, bit_string); //VERIFICAR
-      }
+        bit_string[index] = bit;
+        if(is_leaf(huffman_tree))
+        {
+            bit_string[index + 1] = '\0';
+            strcpy(ht->table[(int) *(unsigned char*) huffman_tree->item]->bits, bit_string); //VERIFICAR
+        }
     }
 
     if(tree->left != NULL){
-      pass_through_edges_and_add_characters(huffman_tree, bit_string, index + 1, '0', ht);
+        pass_through_edges_and_add_characters(huffman_tree, bit_string, index + 1, '0', ht);
     }
 
     if(tree->right != NULL){
-      pass_through_edges_and_add_characters(huffman_tree, bit_string, index + 1, '1', ht);
+        pass_through_edges_and_add_characters(huffman_tree, bit_string, index + 1, '1', ht);
     }
 
 }
