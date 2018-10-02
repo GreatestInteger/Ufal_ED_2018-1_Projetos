@@ -116,6 +116,16 @@ int is_leaf(node *pq){
 
 }
 
+int size_huff(Node *huff){
+
+	if(huff == NULL){
+		return 0;
+	}
+  else{
+		return 1 + size_huff(huff->left) + size_huff(huff->right);
+	}
+}
+
 void print_tree_with_node_atributes(node *pq){
 
     //printf("\n");
