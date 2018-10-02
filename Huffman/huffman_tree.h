@@ -11,6 +11,16 @@ struct node{
     node* right;
 };
 
+node *create_empty_queue(){
+
+    return NULL;
+}
+
+node *create_empty_tree(){
+
+	return NULL;
+}
+
 int is_empty(node *pq);
 
 node *insert_node(node *pq, node *new_node);
