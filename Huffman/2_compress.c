@@ -181,15 +181,15 @@ void compress(char *source_file_name, char *destination_file_name){
 	qtdLixo[3] = '\0'; // Transformando o tamanho da lixo em binario
 
 /*
-	// Constructing the header
+	// Constructing first parts of header: 3 bits (trash size) and 13 bits (huffman tree size)
 	char header[17] = "";
 	strcpy(header, qtdLixo);
 	header[3] = '\0';
 	strcat(header, tree_header_tam);
 	header[16] = '\0';
 
-	// Printa o cabeçario
-	// printf("header-> %s\n", header);
+	// Print first parts of header
+	printf("header: [%s]\n", header);
 
 	rewind(compressed_file);
 	escreverBitsArquivo(compressed_file, header, 16); // Coloca o header no incio do arquivo
