@@ -26,6 +26,104 @@ void freq_count(void *file, hash_table *ht){
 
 } // Calcula a frequência de cada caractere e armazena as frequências na hash table.
 
+int escape(node *huffman_tree, int escapes){
+
+	if(huffman_tree != NULL){
+
+    	if( (*(unsigned char*) huffman_tree->item == 42 || *(unsigned char*) huffman_tree->item == 42 == '\\') && is_leaf(huffman_tree)){
+    		++escapes;
+    	}
+		escapes = escape(huffman_tree -> left, escapes);
+		escapes = escape(huffman_tree -> right, escapes);
+	}
+  return escapes;
+} // Conta a frequencia dos scapes para colocar no tamanho da arvore
+
+void fprint_tree_bytes_header(void *file, node *huffman_tree){
+
+	if(huffman_tree != NULL){
+
+		if( (*(unsigned char*) huffman_tree->item == 42 || *(unsigned char*) huffman_tree->item == 42 == '\\') && is_leaf(huffman_tree)){//verificar
+
+			fprintf(file, "\\%c", (*(unsigned char*) huffman_tree->item));
+
+		}else{
+
+			fprintf(file, "%c", (*(unsigned char*) huffman_tree->item));
+		}
+
+		fprint_tree_bytes_header(file, huffman_tree -> left);
+		fprint_tree_bytes_header(file, huffman_tree -> right);
+	}
+} // Trata o caso dos *
+
+int getUniqueBit(unsigned int c, int i){
+
+	unsigned char mask = c >> i;
+	return mask & 1;
+}
+
+void int_bin(char *bin, int num, int bits){
+
+	int i;
+	for(i=0; i<bits; i++){
+        //printf("[%d]\n", bits-i-1);
+		bin[bits-i-1] = getUniqueBit(num,i)+'0';
+        //printf("%c\n", getUniqueBit(num,i)+'0');
+	}
+	bin[strlen(bin)] = '\0';
+}
+
+int set_bit(unsigned char c, int i){ //VERIFICAR
+
+	unsigned char mask = 1 << i;
+	return mask | c;
+}// seta bit na posicao i
+
+// Retorna o bit que representa esse caractere
+char *getCharBits(hash_table *ht, unsigned char c){
+
+	return ht -> table[(int)c] -> bits;
+}
+
+
+int write_compressed_file(void *source_file, void *compressed_file, hash_table *ht){
+
+	unsigned char byteread;
+	unsigned char byte = 0;
+	char *bitshuff = NULL;
+	int bit_index = 7;
+	int i;
+	rewind(source_file);
+
+	while(fscanf(source_file, "%c", &byteread) > 0){
+
+		bitshuff = getCharBits(ht, byteread);//retorna o bit que representa esse caracter
+		printf("%s\n", bitshuff);
+		for(i = 0 ; i < strlen(bitshuff); ++i){ //PAROU AQUI
+
+			if(bit_index == -1){
+
+				fprintf(compressed_file, "%c", byte);
+				byte = 0;
+				bit_index = 7;
+			}
+			if(bitshuff[i] == '1'){
+
+				byte = set_bit(byte, bit_index);
+			}
+			bit_index--;
+		}
+	}
+	if(bit_index <= 7){
+
+		fprintf(compressed_file, "%c", byte);
+	}
+	bit_index++;
+
+	return bit_index;
+} // Retorna o tamanho do lixo
+
 
 void compress(char *source_file_name, char *destination_file_name){
 
@@ -60,18 +158,20 @@ void compress(char *source_file_name, char *destination_file_name){
 
 	huffman_tree = huff_tree(queue);
 
-	print_tree(huffman_tree);
-	/*
+	//print_tree(huffman_tree);
+	//print_tree_with_node_atributes(huffman_tree);
+
 	fprintf(compressed_file, "00");
 
-	unsigned char bit_string[255];
-	pass_through_edges_and_add_characters(huffman_tree, bit_string, -1, '0', hasht);
+	unsigned char bit_string[256];
+	pass_through_edges_and_add_characters(hasht, huffman_tree, bit_string, -1, '0');
 
 	unsigned int tree_size = size_huff(huffman_tree) + escape(huffman_tree, 0);
-	print_tree_header(compressed_file, huffman_tree);
+	fprint_tree_bytes_header(compressed_file, huffman_tree);
 
 	char *tree_header_tam = (char*)malloc(13*sizeof(char));
 	int_bin(tree_header_tam, tree_size, 13);
+	//printf("[%s]\n", tree_header_tam);
 
 
 	unsigned int lixo = write_compressed_file(source_file, compressed_file, hasht);
@@ -80,8 +180,8 @@ void compress(char *source_file_name, char *destination_file_name){
 	int_bin(qtdLixo, lixo, 3);
 	qtdLixo[3] = '\0'; // Transformando o tamanho da lixo em binario
 
-
-	// Montando o cabeçario
+/*
+	// Constructing the header
 	char header[17] = "";
 	strcpy(header, qtdLixo);
 	header[3] = '\0';
@@ -93,27 +193,10 @@ void compress(char *source_file_name, char *destination_file_name){
 
 	rewind(compressed_file);
 	escreverBitsArquivo(compressed_file, header, 16); // Coloca o header no incio do arquivo
-
+*/
 	fclose(source_file);
 	fclose(compressed_file);
 
 	printf("\n\tEnd of compression!\n\n");
-	*/
-}
 
-int getUniqueBit(unsigned int c, int i){
-
-	unsigned char mask = c >> i;
-	return mask & 1;
-}
-
-void int_bin(char *bin, int num, int bits){
-
-	int i;
-	for(i=0; i<bits; i++){
-        //printf("[%d]\n", bits-i-1);
-		bin[bits-i-1] = getUniqueBit(num,i)+'0';
-        //printf("%c\n", getUniqueBit(num,i)+'0');
-	}
-	bin[strlen(bin)] = '\0';
 }
