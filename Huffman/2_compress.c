@@ -124,6 +124,28 @@ int write_compressed_file(void *source_file, void *compressed_file, hash_table *
 	return bit_index;
 } // Retorna o tamanho do lixo
 
+void escreverBitsArquivo(FILE *arquivo, char *bits){
+
+	int i;
+	unsigned char byte = 0;
+	int bit_index = 7;
+	for(i = 0 ; i < 16; i++){
+
+		if(bits[i] != '0'){
+			byte = set_bit(byte, bit_index);
+		}
+
+		bit_index--;
+
+		if(bit_index < 0){
+
+			bit_index = 7;
+			fprintf(arquivo, "%c", byte);
+			byte = 0;
+		}
+	}
+}
+
 
 void compress(char *source_file_name, char *destination_file_name){
 
@@ -180,7 +202,7 @@ void compress(char *source_file_name, char *destination_file_name){
 	int_bin(qtdLixo, lixo, 3);
 	qtdLixo[3] = '\0'; // Transformando o tamanho da lixo em binario
 
-/*
+
 	// Constructing first parts of header: 3 bits (trash size) and 13 bits (huffman tree size)
 	char header[17] = "";
 	strcpy(header, qtdLixo);
@@ -192,8 +214,8 @@ void compress(char *source_file_name, char *destination_file_name){
 	printf("header: [%s]\n", header);
 
 	rewind(compressed_file);
-	escreverBitsArquivo(compressed_file, header, 16); // Coloca o header no incio do arquivo
-*/
+	escreverBitsArquivo(compressed_file, header); // Coloca o header no incio do arquivo
+
 	fclose(source_file);
 	fclose(compressed_file);
 
