@@ -152,7 +152,7 @@ int size_huff(node *huff){
 
 void print_tree_with_node_atributes(node *pq){
 
-    //printf("\n");
+    printf("\n");
     if (pq != NULL) {
 
         //printf("IF pq != NULL\n");

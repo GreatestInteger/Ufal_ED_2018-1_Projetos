@@ -34,7 +34,7 @@ int main(){
             scanf("%s", destination_file_name);
 			getchar();
 
-			printf("[%s][%s]\n", source_file_name, destination_file_name);
+			//printf("[%s][%s]\n", source_file_name, destination_file_name);
 
 			decompress(source_file_name, destination_file_name);
 			break;

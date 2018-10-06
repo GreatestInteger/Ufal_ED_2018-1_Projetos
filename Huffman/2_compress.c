@@ -165,7 +165,7 @@ void compress(char *source_file_name, char *destination_file_name){
 		return;
 	}
 
-	printf("\n\tCompressing ...\n");
+	printf("\n\tCompressing ...\n\n");
 
 	freq_count(source_file, hasht);
 
@@ -188,12 +188,13 @@ void compress(char *source_file_name, char *destination_file_name){
 	unsigned char bit_string[256];
 	pass_through_edges_and_add_characters(hasht, huffman_tree, bit_string, -1, '0');
 
+	//printf("size_huff(huffman_tree): [%d]\nescape(huffman_tree, 0): [%d]\n", size_huff(huffman_tree), escape(huffman_tree, 0));
 	unsigned int tree_size = size_huff(huffman_tree) + escape(huffman_tree, 0);
 	fprint_tree_bytes_header(compressed_file, huffman_tree);
 
 	char *tree_header_tam = (char*)malloc(13*sizeof(char));
 	int_bin(tree_header_tam, tree_size, 13);
-	//printf("[%s]\n", tree_header_tam);
+	//printf("\ntree_header_tam: [%s]\n", tree_header_tam);
 
 
 	unsigned int lixo = write_compressed_file(source_file, compressed_file, hasht);
@@ -211,7 +212,7 @@ void compress(char *source_file_name, char *destination_file_name){
 	header[16] = '\0';
 
 	// Print first parts of header
-	printf("header: [%s]\n", header);
+	//printf("header: [%s]\n", header);
 
 	rewind(compressed_file);
 	escreverBitsArquivo(compressed_file, header); // Coloca o header no incio do arquivo
