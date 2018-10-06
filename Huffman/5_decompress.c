@@ -75,13 +75,13 @@ void decompress(char *source_file_name, char *destination_file_name){
 	for (i = 0; i < 17; ++i){
 
 		header[i] = '\0';
-	} // Setando tudo pra NULL para não ter problema de lixo
+	} // Setando tudo pra \0 para não ter problema de lixo
 
 	for(i = 0; i < 2; i++){
 	// 2 por ser os dois primeiros bytes
 		for(j = 7; j >= 0; j--){
 		// 7 por ser o tamanho do byte
-			if(!is_bit_i_set(buffer[i], j)){
+			if(is_bit_i_set(buffer[i], j) == 0){
 				header[strlen(header)] = '0'; // O tamanho da string sempre aumenta
 			}else{
 				header[strlen(header)] = '1';
@@ -97,8 +97,8 @@ void decompress(char *source_file_name, char *destination_file_name){
 
 	// i = 2 pois os 2 primeiros bytes já foram lidos
 	// Agora lendo a árvore
-	printf("\n");
-	for(i = 2, pos = 0; i <= size_tree + 1; i++, pos++){
+	//printf("\n");
+	for(i = 2, pos = 0; i < size_tree + 2; i++, pos++){
 
 		fseek(compressed_file, i, SEEK_SET);
 		str_tree[pos] = getc(compressed_file);

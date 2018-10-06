@@ -30,7 +30,7 @@ int escape(node *huffman_tree, int escapes){
 
 	if(huffman_tree != NULL){
 
-    	if( (*(unsigned char*) huffman_tree->item == 42 || *(unsigned char*) huffman_tree->item == 42 == '\\') && is_leaf(huffman_tree)){
+    	if( (*(unsigned char*) huffman_tree->item == 42 || *(unsigned char*) huffman_tree->item == '\\') && is_leaf(huffman_tree)){
     		++escapes;
     	}
 		escapes = escape(huffman_tree -> left, escapes);
@@ -43,7 +43,7 @@ void fprint_tree_bytes_header(void *file, node *huffman_tree){
 
 	if(huffman_tree != NULL){
 
-		if( (*(unsigned char*) huffman_tree->item == 42 || *(unsigned char*) huffman_tree->item == 42 == '\\') && is_leaf(huffman_tree)){//verificar
+		if( (*(unsigned char*) huffman_tree->item == 42 || *(unsigned char*) huffman_tree->item == '\\') && is_leaf(huffman_tree)){//verificar
 
 			fprintf(file, "\\%c", (*(unsigned char*) huffman_tree->item));
 
@@ -68,7 +68,7 @@ void int_bin(char *bin, int num, int bits){
 	int i;
 	for(i=0; i<bits; i++){
         //printf("[%d]\n", bits-i-1);
-		bin[bits-i-1] = getUniqueBit(num,i)+'0';
+		bin[bits-i-1] = getUniqueBit(num,i)+'0'; // Cast de inteiro para char
         //printf("%c\n", getUniqueBit(num,i)+'0');
 	}
 	bin[strlen(bin)] = '\0';
@@ -99,7 +99,7 @@ int write_compressed_file(void *source_file, void *compressed_file, hash_table *
 	while(fscanf(source_file, "%c", &byteread) > 0){
 
 		bitshuff = getCharBits(ht, byteread);//retorna o bit que representa esse caracter
-		printf("%s\n", bitshuff);
+		//printf("%s\n", bitshuff);
 		for(i = 0 ; i < strlen(bitshuff); ++i){ //PAROU AQUI
 
 			if(bit_index == -1){
