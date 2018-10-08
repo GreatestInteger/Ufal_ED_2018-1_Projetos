@@ -3,30 +3,22 @@ void freq_count(void *file, hash_table *ht){
 	unsigned char *buffer;
 	int i;
 
-	fseek(file , 0 , SEEK_END); // Ajusta a posição do indicador com base em uma referência. SEEK_END (final do arquivo) é a referência e 0 é posição à partir da referência. Isso significa que o indicador vai permanecer na referência. O resultado dessa função é que o indicador está ajustado para indicar o final do arquivo.
+	fseek(file , 0 , SEEK_END); // Adjusts the indicator to the end of the file.
+	int file_size = ftell(file); // Returns the position of indicator. It is the file size.
+	rewind(file); // Sets the indicator to the beginnig of the file.
 
-	int file_size = ftell(file); // A função "ftell" retorna a posição do indicador. Nesse caso, ele retorna a posição ajustada pela "fseek", ou seja, o valor da posição do último caractere do arquivo. Essa posição é interpretada como o tamanho do arquivo em bytes (1 caractere = 1 byte).
+	buffer = (unsigned char *) malloc(sizeof(char) *file_size); // Allocates memory space with file size.
+	fread(buffer, 1, file_size, file); // Copies all the characters from "file" to "buffer".
 
-	rewind(file); // Essa função ajusta o indicador para o começo do arquivo, como era antes da função "fseek".
-
-	buffer = (unsigned char *) malloc(sizeof(char) *file_size); // Faz uma atribuição ao "buffer" reservando um espaço na memória igual ao tamanho do arquivo.
-
-	fread(buffer, 1, file_size, file); // Copia os caracteres do arquivo para o "buffer".
-
-	//ht = &(HashT*) ht;
-
-	for(i = 0; i < file_size; i++){
-
+	for(i = 0; i < file_size; i++){ // Goes through the buffer and updates/increments the characters frequency in the hash table.
 		ht -> table[buffer[i]] -> frequency++;
-
-		// Percorre o buffer e atualiza (incrementa) a frequencia do caractere encontrado na hash table.
 	}
 
 	free(buffer);
 
-} // Calcula a frequência de cada caractere e armazena as frequências na hash table.
+} // Counts the the frequency of every character and stores it in the hash table.
 
-int escape(node *huffman_tree, int escapes){
+int escape(node *huffman_tree, int escapes){ // Returns the number of escapes leaves.
 
 	if(huffman_tree != NULL){
 
@@ -37,13 +29,13 @@ int escape(node *huffman_tree, int escapes){
 		escapes = escape(huffman_tree -> right, escapes);
 	}
   return escapes;
-} // Conta a frequencia dos scapes para colocar no tamanho da arvore
+}
 
-void fprint_tree_bytes_header(void *file, node *huffman_tree){
+void fprint_tree_bytes_header(void *file, node *huffman_tree){ // Writes the pre-order tree in the file. It writes \* for each * leaf.
 
 	if(huffman_tree != NULL){
 
-		if( (*(unsigned char*) huffman_tree->item == 42 || *(unsigned char*) huffman_tree->item == '\\') && is_leaf(huffman_tree)){//verificar
+		if( (*(unsigned char*) huffman_tree->item == 42 || *(unsigned char*) huffman_tree->item == '\\') && is_leaf(huffman_tree)){
 
 			fprintf(file, "\\%c", (*(unsigned char*) huffman_tree->item));
 
@@ -55,39 +47,35 @@ void fprint_tree_bytes_header(void *file, node *huffman_tree){
 		fprint_tree_bytes_header(file, huffman_tree -> left);
 		fprint_tree_bytes_header(file, huffman_tree -> right);
 	}
-} // Trata o caso dos *
+}
 
-int getUniqueBit(unsigned int c, int i){
+int int_bin_converter(unsigned int c, int i){
 
 	unsigned char mask = c >> i;
 	return mask & 1;
 }
 
-void int_bin(char *bin, int num, int bits){
+void int_bin(char *bin, int num, int bits){ // Converts a number from decimal to binary
 
 	int i;
 	for(i=0; i<bits; i++){
-        //printf("[%d]\n", bits-i-1);
-		bin[bits-i-1] = getUniqueBit(num,i)+'0'; // Cast de inteiro para char
-        //printf("%c\n", getUniqueBit(num,i)+'0');
+		bin[bits-i-1] = int_bin_converter(num,i)+'0'; // Cast from integer to char
 	}
 	bin[strlen(bin)] = '\0';
 }
 
-int set_bit(unsigned char c, int i){ //VERIFICAR
+int set_bit(unsigned char c, int i){
 
 	unsigned char mask = 1 << i;
 	return mask | c;
-}// seta bit na posicao i
+}// sets bit 1 (one) in index position i
 
-// Retorna o bit que representa esse caractere
-char *getCharBits(hash_table *ht, unsigned char c){
+char *get_char_new_map(hash_table *ht, unsigned char c){ // Returns the new map of this byte
 
-	return ht -> table[(int)c] -> bits;
+	return ht->table[(int)c]->bits;
 }
 
-
-int write_compressed_file(void *source_file, void *compressed_file, hash_table *ht){
+int write_compressed_file(void *source_file, void *compressed_file, hash_table *ht){ // Returns the trash size and writes the compressed file
 
 	unsigned char byteread;
 	unsigned char byte = 0;
@@ -98,8 +86,7 @@ int write_compressed_file(void *source_file, void *compressed_file, hash_table *
 
 	while(fscanf(source_file, "%c", &byteread) > 0){
 
-		bitshuff = getCharBits(ht, byteread);//retorna o bit que representa esse caracter
-		//printf("%s\n", bitshuff);
+		bitshuff = get_char_new_map(ht, byteread); // Returns the new map of this byte
 		for(i = 0 ; i < strlen(bitshuff); ++i){
 
 			if(bit_index == -1){
@@ -122,9 +109,9 @@ int write_compressed_file(void *source_file, void *compressed_file, hash_table *
 	bit_index++;
 
 	return bit_index;
-} // Retorna o tamanho do lixo
+}
 
-void escreverBitsArquivo(FILE *arquivo, char *bits){
+void fprint_trash_and_tree_size(FILE *arquivo, char *bits){
 
 	int i;
 	unsigned char byte = 0;
@@ -154,68 +141,57 @@ void compress(char *source_file_name, char *destination_file_name){
 	node  *queue = create_empty_queue();
 	node  *huffman_tree = create_empty_tree();
 	unsigned int i;
-	//unsigned char data[256];
 
 	source_file = fopen(source_file_name, "rb");
 	compressed_file = fopen(destination_file_name, "wb");
 
 	if (source_file == NULL || compressed_file == NULL){
-
 		printf("\n\tWrong file path.\n");
 		return;
 	}
 
 	printf("\n\tCompressing ...\n\n");
 
-	freq_count(source_file, hasht);
+	freq_count(source_file, hasht); // Counts the the frequency of every character and stores it in the hash table.
 
-
-	for(i = 0; i < 256; i++){
-		if(hasht -> table[i] -> frequency > 0){
-			//data[i] = i;
-			queue = enqueue(queue, &i, hasht -> table[i] -> frequency);
+	for(i = 0; i < 256; i++){ // Enqueues every item with frequency greater than zero in the priority queue.
+		if(hasht->table[i]->frequency > 0){
+			queue = enqueue(queue, &i, hasht->table[i]->frequency);
 		}
 	}
 	//print_priority_queue(queue);
 
-	huffman_tree = huff_tree(queue);
-
-	//print_tree(huffman_tree);
-	//print_tree_with_node_atributes(huffman_tree);
-
-	fprintf(compressed_file, "00");
+	huffman_tree = huff_tree(queue); // Transforms the priority queue into a huffman tree.
+	print_tree(huffman_tree);
 
 	unsigned char bit_string[256];
-	pass_through_edges_and_add_characters(hasht, huffman_tree, bit_string, -1, '0');
+	pass_through_edges_and_add_characters(hasht, huffman_tree, bit_string, -1, '0');  // Updates "bits" in the hash table with the new byte map.
 
-	//printf("size_huff(huffman_tree): [%d]\nescape(huffman_tree, 0): [%d]\n", size_huff(huffman_tree), escape(huffman_tree, 0));
-	unsigned int tree_size = size_huff(huffman_tree) + escape(huffman_tree, 0);
-	fprint_tree_bytes_header(compressed_file, huffman_tree);
+	/* WRITING BITS IN THE NEW FILE */
 
-	char *tree_header_tam = (char*)malloc(13*sizeof(char));
-	int_bin(tree_header_tam, tree_size, 13);
-	//printf("\ntree_header_tam: [%s]\n", tree_header_tam);
+	fprintf(compressed_file, "00"); // Reserves the first 16 bits.
 
+	unsigned int tree_size = size_huff(huffman_tree) + escape(huffman_tree, 0); // Total of nodes + total of escape leafs. This is done because in the pre-order tree we write \* for each * leaf.
+	fprint_tree_bytes_header(compressed_file, huffman_tree); // Writes the pre-order tree in the file (THIRD part of header).
 
-	unsigned int lixo = write_compressed_file(source_file, compressed_file, hasht);
+	char *tree_header_size = (char*)malloc(13*sizeof(char));
+	int_bin(tree_header_size, tree_size, 13);
 
-	char *qtdLixo = (char*)malloc(4*sizeof(char));
-	int_bin(qtdLixo, lixo, 3);
-	qtdLixo[3] = '\0'; // Transformando o tamanho da lixo em binario
+	unsigned int trash = write_compressed_file(source_file, compressed_file, hasht);
 
+	char *trash_size = (char*)malloc(4*sizeof(char));
+	int_bin(trash_size, trash, 3);
+	trash_size[3] = '\0';
 
-	// Constructing first parts of header: 3 bits (trash size) and 13 bits (huffman tree size)
+	// Constructing FIRST and SECOND parts of header: 3 bits (trash size) and 13 bits (huffman tree size)
 	char header[17] = "";
-	strcpy(header, qtdLixo);
+	strcpy(header, trash_size);
 	header[3] = '\0';
-	strcat(header, tree_header_tam);
+	strcat(header, tree_header_size);
 	header[16] = '\0';
 
-	// Print first parts of header
-	//printf("header: [%s]\n", header);
-
 	rewind(compressed_file);
-	escreverBitsArquivo(compressed_file, header); // Coloca o header no incio do arquivo
+	fprint_trash_and_tree_size(compressed_file, header);
 
 	fclose(source_file);
 	fclose(compressed_file);
