@@ -16,13 +16,13 @@ node *build_tree(char *str_tree, int *pos){ // rebuilds the huffman tree using t
 		*pos = *pos + 1;
 		node *left = build_tree(str_tree, pos);
 		*pos = *pos + 1;
-		return add_node(&character, left, build_tree(str_tree, pos));
+		return add_node(&character, left, build_tree(str_tree, pos)); \\
 	}else if(str_tree[*pos] == '\\'){
 
 		*pos = *pos + 1;
-		return add_node(&str_tree[*pos], NULL, NULL);
+		return add_node(&str_tree[*pos], NULL, NULL); // If it is a leaf with "*" or "\"
 	}
-	return add_node(&str_tree[*pos], NULL, NULL);
+	return add_node(&str_tree[*pos], NULL, NULL); // If it is a leaf
 }
 
 int is_bit_i_set(unsigned char c, int i){
