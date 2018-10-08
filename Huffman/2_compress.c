@@ -162,7 +162,7 @@ void compress(char *source_file_name, char *destination_file_name){
 	//print_priority_queue(queue);
 
 	huffman_tree = huff_tree(queue); // Transforms the priority queue into a huffman tree.
-	print_tree(huffman_tree);
+	//print_tree(huffman_tree);
 
 	unsigned char bit_string[256];
 	pass_through_edges_and_add_characters(hasht, huffman_tree, bit_string, -1, '0');  // Updates "bits" in the hash table with the new byte map.
