@@ -100,7 +100,7 @@ int write_compressed_file(void *source_file, void *compressed_file, hash_table *
 
 		bitshuff = getCharBits(ht, byteread);//retorna o bit que representa esse caracter
 		//printf("%s\n", bitshuff);
-		for(i = 0 ; i < strlen(bitshuff); ++i){ //PAROU AQUI
+		for(i = 0 ; i < strlen(bitshuff); ++i){
 
 			if(bit_index == -1){
 
